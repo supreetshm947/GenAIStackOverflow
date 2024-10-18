@@ -15,15 +15,22 @@ def get_llm():
     return llm
 
 
-def get_keywords_from_query(query):
+def get_answer_for_query(query, posts):
     llm = get_llm()
+
+    system_message = (
+        "You are an assistant specialized in providing answers based solely on the provided Stack Overflow posts. "
+        "Do not use your general knowledge or assumptions. Use the content from the posts to formulate your answer."
+        "If there are no posts provided, simply say you dont know the answers, dont make it up."
+        "In the end, provide a further reading section where you list the links of the Stack overflow posts which you used to answer, so not all just the one you used to construct the answer."
+    )
+
+    # Prepare the prompt template with the system message and the user query
     prompt = ChatPromptTemplate.from_messages(
         [
-            (
-                "system",
-                "Extract the keywords from the given query and just return the Keywords as list.",
-            ),
-            ("human", "{input}"),
+            ("system", system_message),
+            ("human",
+             f"{query}\n\nHere are the related Stack Overflow posts:\n" + "\n".join(str(post) for post in posts)),
         ]
     )
 
@@ -34,4 +41,4 @@ def get_keywords_from_query(query):
         }
     )
 
-    return eval(out.content)
+    return out.content

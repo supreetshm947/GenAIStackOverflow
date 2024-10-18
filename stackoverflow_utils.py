@@ -1,41 +1,36 @@
 import requests
 import json
-from constants import CLIENT_ID, CLIENT_SECRET, KEY
+from constants import STACK_OVERFLOW_CLIENT_ID, STACK_OVERFLOW_CLIENT_SECRET, STACK_OVERFLOW_API_KEY
+from bs4 import BeautifulSoup
 
 
-# Replace with your actual credentials
-API_KEY = KEY
-CLIENT_ID = CLIENT_ID
-CLIENT_SECRET = CLIENT_SECRET
+def search_stackoverflow(query):
+    url = 'https://api.stackexchange.com//2.3/search/advanced'
 
-
-def search_stackoverflow(query, pagesize=10):
-    # Prepare the API endpoint URL
-    url = 'https://api.stackexchange.com/2.3/search'
-
-    # Define the parameters for the API request
     params = {
         'order': 'desc',
         'sort': 'relevance',
-        'intitle': query,
+        'q': query,
         'site': 'stackoverflow',
-        'key': API_KEY,
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'pagesize': pagesize  # Set the number of items to retrieve
+        'answers': 1,
+        'key': STACK_OVERFLOW_API_KEY,
+        'client_id': STACK_OVERFLOW_CLIENT_ID,
+        'client_secret': STACK_OVERFLOW_CLIENT_SECRET,
     }
 
     try:
-        # Make the GET request to the Stack Exchange API
-        response = requests.get(url, params=params)
-        response.raise_for_status()  # Raise an error for bad responses
 
-        # Parse the JSON response
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
         data = response.json()
 
-        # Check if items were returned
         if 'items' in data:
-            return data['items']
+            questions = data['items']
+            for question in questions:
+                question_id = question['question_id']
+                question['answers'] = get_answers(question_id)
+            return questions
         else:
             print("No items found.")
             return []
@@ -45,4 +40,40 @@ def search_stackoverflow(query, pagesize=10):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-search_stackoverflow("Nvidia GPU")
+
+def get_answers(question_id):
+    """
+    Gets the highest voted answer as text.
+    :param question_id:
+    :return: html escaped answer text
+    """
+    url = f'https://api.stackexchange.com/2.3/questions/{question_id}/answers'
+
+    params = {
+        'order': 'desc',
+        'sort': 'votes',
+        'site': 'stackoverflow',
+        'key': STACK_OVERFLOW_API_KEY,
+        'client_id': STACK_OVERFLOW_CLIENT_ID,
+        'client_secret': STACK_OVERFLOW_CLIENT_SECRET,
+        'filter': 'withbody'
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
+        data = response.json()
+
+        if 'items' in data:
+            answer =  data['items'][0]
+            soup = BeautifulSoup(answer['body'], 'html.parser')
+            clean_text = soup.get_text().strip()
+            return clean_text
+
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP error occurred while fetching answers for question {question_id}: {err}")
+        return []
+    except Exception as e:
+        print(f"An error occurred while fetching answers for question {question_id}: {e}")
+        return []
