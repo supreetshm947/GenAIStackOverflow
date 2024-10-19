@@ -1,9 +1,10 @@
 import streamlit as st
 from api.stackoverflow_utils import search_stackoverflow_with_query, search_stackoverflow_with_tags
 from db_utils import save_to_postgres, save_vector_to_qdrant, retrieve_similar_vectors, get_post_by_question_id
-from llm.cohere import get_embeddings_for_query
-from llm.gemini import get_answer_for_query
+from llm.cohere_utils import get_embeddings_for_query
+from llm.gemini_utils import get_answer_for_query
 from constants import VECTOR_SEARCH_THRESHOLD
+from utils import rewrite_query
 
 st.title("Stack Overflow Q&A Assistant")
 query = st.text_input("Enter your question:")
@@ -11,6 +12,7 @@ query = st.text_input("Enter your question:")
 if st.button("Submit"):
     with st.spinner("Searching for answers..."):
         if query and query.strip() != "":
+            query = rewrite_query(query)
             # Step 1: Searching for similar vectors in the database
             with st.spinner("Searching for similar vectors in the database..."):
                 vector_query = get_embeddings_for_query(query)

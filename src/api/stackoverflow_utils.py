@@ -1,7 +1,7 @@
 import requests
 from constants import STACK_OVERFLOW_CLIENT_ID, STACK_OVERFLOW_CLIENT_SECRET, STACK_OVERFLOW_API_KEY
 from bs4 import BeautifulSoup
-from llm.gemini import get_keywords_from_query
+from llm.gemini_utils import get_keywords_from_query
 from model.stackoverflow_post import StackOverflowPost
 
 def search_stackoverflow(api_url, params):
