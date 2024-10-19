@@ -25,8 +25,8 @@ This project implements a Generative AI (GenAI) workflow using **Langchain** to 
 
    ```bash
    conda create -n ENV_NAME python=3.11 -y
-	 conda activate ENV_NAME
-	 pip install -r requirements.txt
+   conda activate ENV_NAME
+   pip install -r requirements.txt
 
 2. **Setting up Qdrant Collection**
     ```bash
