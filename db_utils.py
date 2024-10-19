@@ -20,19 +20,7 @@ def get_postgres_session():
 def save_to_postgres(stack_overflow_post):
     session = get_postgres_session()
     try:
-        new_post = StackOverflowPost(
-            question_id=stack_overflow_post['question_id'],
-            title=stack_overflow_post['title'],
-            answer_count=stack_overflow_post.get('answer_count'),
-            creation_date=convert_timestamp_to_datetime(stack_overflow_post.get('creation_date')),
-            last_edit_date=convert_timestamp_to_datetime(stack_overflow_post.get('last_edit_date')),
-            tags=stack_overflow_post.get('tags'),
-            link=stack_overflow_post['link'],
-            is_answered=stack_overflow_post.get('is_answered'),
-            score= stack_overflow_post.get('score'),
-            answer=stack_overflow_post.get('answers')
-        )
-        session.add(new_post)
+        session.add(stack_overflow_post)
         session.commit()
 
     except Exception as e:
@@ -70,12 +58,13 @@ def save_vector_to_qdrant(question_id, vector_embedding):
     except Exception as e:
         print(f"An error occurred while saving vector to Qdrant: {e}")
 
-def retrieve_similar_vectors(query_vector):
+def retrieve_similar_vectors(query_vector, threshold=0.7):
     client = QdrantClient(url=QDRANT_URL)
     search_results = client.search(
         collection_name=QDRANT_COLLECTION_NAME,
         query_vector=query_vector,
-        limit=5
+        limit=5,
+        score_threshold=threshold
     )
 
     return search_results

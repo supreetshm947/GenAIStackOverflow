@@ -2,15 +2,13 @@ import requests
 import json
 from constants import STACK_OVERFLOW_CLIENT_ID, STACK_OVERFLOW_CLIENT_SECRET, STACK_OVERFLOW_API_KEY
 from bs4 import BeautifulSoup
+from gemini_utils import get_keywords_from_query
+from model.stackoverflow_post import StackOverflowPost
 
-
-def search_stackoverflow(query):
-    url = 'https://api.stackexchange.com//2.3/search/advanced'
-
-    params = {
+def search_stackoverflow(api_url, params):
+    def_params = {
         'order': 'desc',
         'sort': 'relevance',
-        'q': query,
         'site': 'stackoverflow',
         'answers': 1,
         'key': STACK_OVERFLOW_API_KEY,
@@ -18,19 +16,24 @@ def search_stackoverflow(query):
         'client_secret': STACK_OVERFLOW_CLIENT_SECRET,
     }
 
+    def_params.update(params)
+
     try:
 
-        response = requests.get(url, params=params)
+        response = requests.get(api_url, params=def_params)
         response.raise_for_status()
 
         data = response.json()
+
+        posts = []
 
         if 'items' in data:
             questions = data['items']
             for question in questions:
                 question_id = question['question_id']
                 question['answers'] = get_answers(question_id)
-            return questions
+                posts.append(StackOverflowPost(question))
+            return posts
         else:
             print("No items found.")
             return []
@@ -77,3 +80,19 @@ def get_answers(question_id):
     except Exception as e:
         print(f"An error occurred while fetching answers for question {question_id}: {e}")
         return []
+
+
+def search_stackoverflow_with_tags(query):
+    tags = get_keywords_from_query(query)
+    url = 'https://api.stackexchange.com/2.3/search'
+    params = {
+        'tagged': ";".join(tags)
+    }
+    return search_stackoverflow(url, params)
+
+def search_stackoverflow_with_query(query):
+    url = 'https://api.stackexchange.com/2.3/search/advanced'
+    params = {
+        'q': query
+    }
+    return search_stackoverflow(url, params)

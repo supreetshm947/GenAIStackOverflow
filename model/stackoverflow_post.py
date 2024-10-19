@@ -1,7 +1,23 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, TIMESTAMP, TEXT, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
+from utils import convert_timestamp_to_datetime
 
 class StackOverflowPost(declarative_base()):
+
+    def __init__(self, post):
+        super(StackOverflowPost, self)
+        self.question_id = post['question_id']
+        self.title = post['title']
+        self.answer_count = post.get('answer_count')
+        self.creation_date = convert_timestamp_to_datetime(post.get('creation_date'))
+        self.last_edit_date = convert_timestamp_to_datetime(post.get('last_edit_date')) if 'last_edit_date' in post and not post.get('last_edit_date') else None
+        self.tags = post.get('tags')
+        self.link = post['link']
+        self.is_answered = post.get('is_answered')
+        self.score = post.get('score')
+        self.answer = post.get('answers')
+
+
     __tablename__ = 'stackoverflow_posts'
 
     question_id = Column(Integer, primary_key=True)
@@ -28,3 +44,11 @@ class StackOverflowPost(declarative_base()):
             f"Last Edit Date: {self.last_edit_date}\n"
             f"Answer: {self.answer}\n"
         )
+
+    def __eq__(self, other):
+        if isinstance(other, StackOverflowPost):
+            return self.question_id == other.question_id
+        return False
+
+    def __hash__(self):
+        return hash(self.question_id)

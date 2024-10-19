@@ -22,6 +22,8 @@ def get_answer_for_query(query, posts):
         "You are an assistant specialized in providing answers based solely on the provided Stack Overflow posts. "
         "Do not use your general knowledge or assumptions. Use the content from the posts to formulate your answer."
         "If there are no posts provided, simply say you dont know the answers, dont make it up."
+        "It could be that the provided posts do not provide a clear context for the asked query or talk about completely different, "
+        "in that case apologize and tell user you only have details regarding the context of most relevant gathered posts and make up an answer based on it."
         "In the end, provide a further reading section where you list the links of the Stack overflow posts which you used to answer, so not all just the one you used to construct the answer."
     )
 
@@ -42,3 +44,26 @@ def get_answer_for_query(query, posts):
     )
 
     return out.content
+
+
+
+def get_keywords_from_query(query):
+    llm = get_llm()
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Extract the keywords from the given query and just return the Keywords as list.",
+            ),
+            ("human", "{input}"),
+        ]
+    )
+
+    chain = prompt | llm
+    out = chain.invoke(
+        {
+            "input": query,
+        }
+    )
+
+    return eval(out.content)
