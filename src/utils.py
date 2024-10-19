@@ -10,3 +10,9 @@ def rewrite_query(query):
     response = chat_cohere(system_message, human_message)
 
     return response.message.content[0].text
+
+
+def escape_curly_braces(input_str):
+    escaped_text = input_str.replace("{", "{{")
+    escaped_text = escaped_text.replace("}", "}}")
+    return escaped_text

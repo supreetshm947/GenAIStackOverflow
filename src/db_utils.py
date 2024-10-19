@@ -57,7 +57,7 @@ def save_vector_to_qdrant(question_id, vector_embedding):
     except Exception as e:
         print(f"An error occurred while saving vector to Qdrant: {e}")
 
-def retrieve_similar_vectors(query_vector, threshold=0.7):
+def retrieve_similar_vectors(query_vector, threshold=0.5):
     client = QdrantClient(url=QDRANT_URL)
     search_results = client.search(
         collection_name=QDRANT_COLLECTION_NAME,

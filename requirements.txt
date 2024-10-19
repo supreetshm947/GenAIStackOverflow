@@ -12,3 +12,4 @@ beautifulsoup4
 psycopg2-binary
 sqlalchemy
 qdrant-client
+markdownify

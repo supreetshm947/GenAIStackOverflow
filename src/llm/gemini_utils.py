@@ -1,6 +1,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from constants import GEMINI_KEY
 from langchain_core.prompts import ChatPromptTemplate
+from utils import escape_curly_braces
 
 
 def get_llm():
@@ -28,11 +29,12 @@ def get_answer_for_query(query, posts):
     )
 
     # Prepare the prompt template with the system message and the user query
+
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_message),
             ("human",
-             f"{query}\n\nHere are the related Stack Overflow posts:\n" + "\n".join(str(post) for post in posts)),
+             f"{query}\n\nHere are the related Stack Overflow posts:\n" + "\n".join(escape_curly_braces(str(post)) for post in posts)),
         ]
     )
 
