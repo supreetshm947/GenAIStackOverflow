@@ -1,8 +1,8 @@
 import streamlit as st
-from stackoverflow_utils import search_stackoverflow_with_query, search_stackoverflow_with_tags
+from api.stackoverflow_utils import search_stackoverflow_with_query, search_stackoverflow_with_tags
 from db_utils import save_to_postgres, save_vector_to_qdrant, retrieve_similar_vectors, get_post_by_question_id
-from cohere_utils import get_embeddings_for_query
-from gemini_utils import get_answer_for_query
+from llm.cohere import get_embeddings_for_query
+from llm.gemini import get_answer_for_query
 from constants import VECTOR_SEARCH_THRESHOLD
 
 st.title("Stack Overflow Q&A Assistant")

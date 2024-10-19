@@ -3,7 +3,6 @@ from sqlalchemy.exc import NoResultFound
 from constants import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB, QDRANT_HOST, QDRANT_PORT, QDRANT_COLLECTION_NAME
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from utils import convert_timestamp_to_datetime
 from qdrant_client.models import PointStruct
 from qdrant_client import QdrantClient
 
