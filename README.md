@@ -16,7 +16,7 @@ This project implements a Generative AI (GenAI) workflow using **Langchain** to 
 ## 🫕 Project Overview
 
 <p align="center">
-	<img src="screens/workflow.jpg" alt="workflow"  style="width:60%;"/>
+	<img src="screens/workflow.jpg" alt="workflow"  style="width:90%;"/>
 </p>
 
 ### 🚀 How to Run the Project
