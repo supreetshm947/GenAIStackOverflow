@@ -4,7 +4,21 @@ from db_utils import save_to_postgres, save_vector_to_qdrant, retrieve_similar_v
 from llm.cohere_utils import get_embeddings_for_query
 from llm.gemini_utils import get_answer_for_query
 from constants import VECTOR_SEARCH_THRESHOLD
-from utils import rewrite_query
+from utils import rewrite_query, create_vector_index, create_constraints
+
+from langchain_community.graphs import Neo4jGraph
+from src.constants import NEO4J_USERNAME, NEO4J_PASSWORD, NEO4J_URI, COHERE_EMBEDDING_SIZE, STACK_OVERFLOW_NUM_PAGE
+from src.llm.gemini_utils import get_llm
+from src.api.stackoverflow_utils import search_stackoverflow_with_tags
+from src.llm.embedding_model import MyEmbeddingModel
+
+
+neo4j_graph = Neo4jGraph(url=NEO4J_URI, username=NEO4J_USERNAME, password=NEO4J_PASSWORD)
+embedding_model = MyEmbeddingModel()
+create_vector_index(neo4j_graph, COHERE_EMBEDDING_SIZE)
+create_constraints(neo4j_graph)
+llm = get_llm()
+
 
 st.title("Stack Overflow Q&A Assistant")
 query = st.text_input("Enter your question:")

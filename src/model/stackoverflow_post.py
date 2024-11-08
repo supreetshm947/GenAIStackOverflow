@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, TIMESTAMP, TEXT, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
-from utils import convert_timestamp_to_datetime
+from src.utils import convert_timestamp_to_datetime
 
-class StackOverflowPost(declarative_base()):
+# class StackOverflowPost(declarative_base()):
+class StackOverflowPost:
 
     def __init__(self, post):
-        super(StackOverflowPost, self)
+        # super(StackOverflowPost, self)
         self.question_id = post['question_id']
         self.title = post['title']
         self.answer_count = post.get('answer_count')
@@ -18,7 +19,7 @@ class StackOverflowPost(declarative_base()):
         self.answer = post.get('answers')
 
 
-    __tablename__ = 'stackoverflow_posts'
+    # __tablename__ = 'stackoverflow_posts'
 
     question_id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)

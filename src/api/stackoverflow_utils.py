@@ -1,8 +1,7 @@
 import requests
-from constants import STACK_OVERFLOW_CLIENT_ID, STACK_OVERFLOW_CLIENT_SECRET, STACK_OVERFLOW_API_KEY
+from src.constants import STACK_OVERFLOW_CLIENT_ID, STACK_OVERFLOW_CLIENT_SECRET, STACK_OVERFLOW_API_KEY
 from bs4 import BeautifulSoup
-from llm.gemini_utils import get_keywords_from_query
-from model.stackoverflow_post import StackOverflowPost
+from src.llm.gemini_utils import get_keywords_from_query
 
 def search_stackoverflow(api_url, params):
     def_params = {
@@ -25,17 +24,17 @@ def search_stackoverflow(api_url, params):
         data = response.json()
 
         posts = []
-
+        has_more = data["has_more"] if "has_more" in data else False
         if 'items' in data:
             questions = data['items']
             for question in questions:
                 question_id = question['question_id']
                 question['answers'] = get_answers(question_id)
-                posts.append(StackOverflowPost(question))
-            return posts
+                posts.append(question)
+            return posts, has_more
         else:
             print("No items found.")
-            return []
+            return [], has_more
 
     except requests.exceptions.HTTPError as err:
         print(f"HTTP error occurred: {err}")
@@ -58,7 +57,8 @@ def get_answers(question_id):
         'key': STACK_OVERFLOW_API_KEY,
         'client_id': STACK_OVERFLOW_CLIENT_ID,
         'client_secret': STACK_OVERFLOW_CLIENT_SECRET,
-        'filter': 'withbody'
+        'filter': 'withbody',
+        'pagesize':100
     }
 
     try:
@@ -66,12 +66,15 @@ def get_answers(question_id):
         response.raise_for_status()
 
         data = response.json()
-
+        answers = []
         if 'items' in data:
-            answer =  data['items'][0]
-            soup = BeautifulSoup(answer['body'], 'html.parser')
-            clean_text = soup.get_text().strip()
-            return clean_text
+            for response in data['items']:
+                answer =  response
+                soup = BeautifulSoup(answer['body'], 'html.parser')
+                answer['body'] = soup.get_text().strip()
+                answers.append(answer)
+
+        return answers
 
     except requests.exceptions.HTTPError as err:
         print(f"HTTP error occurred while fetching answers for question {question_id}: {err}")
@@ -81,17 +84,19 @@ def get_answers(question_id):
         return []
 
 
-def search_stackoverflow_with_tags(query):
+def search_stackoverflow_with_tags(query, page):
     tags = get_keywords_from_query(query)
     url = 'https://api.stackexchange.com/2.3/search'
     params = {
-        'tagged': ";".join(tags)
+        'tagged': ";".join(tags),
+        'page':page
     }
     return search_stackoverflow(url, params)
 
-def search_stackoverflow_with_query(query):
+def search_stackoverflow_with_query(query, page):
     url = 'https://api.stackexchange.com/2.3/search/advanced'
     params = {
-        'q': query
+        'q': query,
+        'page':page
     }
     return search_stackoverflow(url, params)

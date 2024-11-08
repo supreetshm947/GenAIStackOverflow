@@ -1,7 +1,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-from constants import GEMINI_KEY
+from src.constants import GEMINI_KEY
 from langchain_core.prompts import ChatPromptTemplate
-from utils import escape_curly_braces
+# from src.utils import escape_curly_braces
 
 
 def get_llm():
